@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>OrenHadar.net | Paint Socket</title>
+	<link rel="stylesheet" href="/paint-socket.css" type="text/css">
+	<link href="https://fonts.googleapis.com/css?family=Hind:600" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div id="paint_socket" class="snippet-container">
+<div id="ps_title" class="snippet_title">
+	<p class="ps_title-line">You are connected to Paint Socket!</p>
+	<p class="ps_title-line">Draw something for your fellow sketchers.</p>
+	<p class="ps_title-line">Each doodle lasts 30 seconds.</p>
+</div>
+<div id="ps_board"></div>
+<div id="ps_background"></div>
+<canvas id="ps_canvas"></canvas>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/paint-socket.js"></script>
+</body>
+</html>

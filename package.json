@@ -1,0 +1,35 @@
+{
+  "name": "webpack3-express",
+  "version": "1.0.0",
+  "engines": {
+    "node": "6.10.3"
+  },
+  "description": "",
+  "scripts": {
+    "build": "webpack",
+    "debug": "webpack && node --inspect ./build/server.js",
+    "start": "node ./build/server.js"
+  },
+  "keywords": [],
+  "author": "Oren Hadar",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-core": "^6.25.0",
+    "babel-loader": "^7.1.1",
+    "babel-preset-env": "^1.6.0"
+  },
+  "dependencies": {
+    "bcrypt": "^1.0.2",
+    "body-parser": "^1.17.2",
+    "dotenv": "^4.0.0",
+    "express": "^4.15.3",
+    "googleapis": "^20.1.0",
+    "jsonwebtoken": "^7.4.1",
+    "mongodb": "^2.2.29",
+    "mongoose": "^4.11.1",
+    "node-cron": "^1.2.0",
+    "socket.io": "^2.0.3",
+    "source-map-support": "^0.4.15",
+    "webpack": "^3.0.0"
+  }
+}
