@@ -1,5 +1,5 @@
 # webpack3-express
-A basic Node.js + Express server, written in ES6 and bundled on server with Webpack 3.
+A basic Node.js + Express server, written in ES6 and bundled for server with Webpack 3.
 
 Serving the following features:
 - A simple login with encrypted password mechanism. Data is stored on a MongoDB.
