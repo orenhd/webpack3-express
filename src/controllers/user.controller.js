@@ -6,7 +6,7 @@ import {db, MEADOWS_COLLECTION} from '../databases/mongo_db';
 
 const AT_STRING = 'thisisthestring';
 
-exports.user_signup = (req, res) => {
+export const user_signup = (req, res) => {
 	let user_temp = new UserModel({
 		username: req.body.username,
 		password: req.body.password
@@ -18,7 +18,7 @@ exports.user_signup = (req, res) => {
 	  });
 };
 
-exports.user_login = (req, res) => {
+export const user_login = (req, res) => {
 	UserModel.findOne({ username: req.body.username }, (err, user) => {
 		if (err) throw err;
 		
@@ -49,7 +49,7 @@ exports.user_login = (req, res) => {
 };
 
 // route middleware to verify a token
-exports.user_verify_token = (req, res, next) => {
+export const user_verify_token = (req, res, next) => {
 
   // check header or url parameters or post parameters for token
   let token = req.body.token || req.query.token || req.headers['x-access-token'];
@@ -75,7 +75,7 @@ exports.user_verify_token = (req, res, next) => {
   }
 };
 
-exports.user_get = (req, res) => {
+export const user_get = (req, res) => {
 	db.collection(MEADOWS_COLLECTION).findOne({ 'username': req.params.id }, (err, doc) => {
 			if (err) {
 			  handleError(res, err.message, "Failed to get meadow");

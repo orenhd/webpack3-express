@@ -1,6 +1,6 @@
 import express from 'express';
 
-import chatbot_controller from '../controllers/chatbot.controller';
+import * as chatbot_controller from '../controllers/chatbot.controller';
 
 const router = express.Router();
 
@@ -26,5 +26,5 @@ router.post('/webhook', chatbot_controller.webhook);
  
 router.get('/youtube_search', chatbot_controller.youtube_search);
 	
-module.exports = router;
+export default router;
 	

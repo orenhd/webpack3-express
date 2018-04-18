@@ -15,4 +15,4 @@ router.get('/', function(req, res) {
 router.use('/user', user);
 router.use('/chatbot', chatbot);
 
-module.exports = router;
+export default router;

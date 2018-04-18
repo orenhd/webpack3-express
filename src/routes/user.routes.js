@@ -1,6 +1,6 @@
 import express from 'express';
 
-import user_controller from '../controllers/user.controller';
+import * as user_controller from '../controllers/user.controller';
 
 const router = express.Router();
 
@@ -15,5 +15,5 @@ router.use(user_controller.user_verify_token);
 
 router.get('/:id', user_controller.user_get);
 	
-module.exports = router;
+export default router;
 	

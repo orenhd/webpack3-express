@@ -188,6 +188,10 @@ module.exports = require("body-parser");
 "use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 var _express = __webpack_require__(0);
 
 var _express2 = _interopRequireDefault(_express);
@@ -214,7 +218,7 @@ router.get('/', function (req, res) {
 router.use('/user', _user2.default);
 router.use('/chatbot', _chatbot2.default);
 
-module.exports = router;
+exports.default = router;
 
 /***/ }),
 /* 7 */
@@ -223,13 +227,19 @@ module.exports = router;
 "use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
 var _express = __webpack_require__(0);
 
 var _express2 = _interopRequireDefault(_express);
 
 var _user = __webpack_require__(8);
 
-var _user2 = _interopRequireDefault(_user);
+var user_controller = _interopRequireWildcard(_user);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -237,16 +247,16 @@ var router = _express2.default.Router();
 
 // define routes
 
-router.post('/signup', _user2.default.user_signup);
+router.post('/signup', user_controller.user_signup);
 
-router.post('/login', _user2.default.user_login);
+router.post('/login', user_controller.user_login);
 
 // route middleware to verify a token on all following user routes
-router.use(_user2.default.user_verify_token);
+router.use(user_controller.user_verify_token);
 
-router.get('/:id', _user2.default.user_get);
+router.get('/:id', user_controller.user_get);
 
-module.exports = router;
+exports.default = router;
 
 /***/ }),
 /* 8 */
@@ -254,6 +264,11 @@ module.exports = router;
 
 "use strict";
 
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+exports.user_get = exports.user_verify_token = exports.user_login = exports.user_signup = undefined;
 
 var _jsonwebtoken = __webpack_require__(9);
 
@@ -267,7 +282,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var AT_STRING = 'thisisthestring';
 
-exports.user_signup = function (req, res) {
+var user_signup = exports.user_signup = function user_signup(req, res) {
 	var user_temp = new _user.UserModel({
 		username: req.body.username,
 		password: req.body.password
@@ -281,7 +296,7 @@ exports.user_signup = function (req, res) {
 	});
 };
 
-exports.user_login = function (req, res) {
+var user_login = exports.user_login = function user_login(req, res) {
 	_user.UserModel.findOne({ username: req.body.username }, function (err, user) {
 		if (err) throw err;
 
@@ -312,7 +327,7 @@ exports.user_login = function (req, res) {
 };
 
 // route middleware to verify a token
-exports.user_verify_token = function (req, res, next) {
+var user_verify_token = exports.user_verify_token = function user_verify_token(req, res, next) {
 
 	// check header or url parameters or post parameters for token
 	var token = req.body.token || req.query.token || req.headers['x-access-token'];
@@ -338,7 +353,7 @@ exports.user_verify_token = function (req, res, next) {
 	}
 };
 
-exports.user_get = function (req, res) {
+var user_get = exports.user_get = function user_get(req, res) {
 	_mongo_db.db.collection(_mongo_db.MEADOWS_COLLECTION).findOne({ 'username': req.params.id }, function (err, doc) {
 		if (err) {
 			handleError(res, err.message, "Failed to get meadow");
@@ -436,13 +451,19 @@ module.exports = require("dotenv");
 "use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
 var _express = __webpack_require__(0);
 
 var _express2 = _interopRequireDefault(_express);
 
 var _chatbot = __webpack_require__(14);
 
-var _chatbot2 = _interopRequireDefault(_chatbot);
+var chatbot_controller = _interopRequireWildcard(_chatbot);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -462,15 +483,15 @@ router.get('/webhook', function (req, res) {
   }
 });
 
-router.post('/webhook', _chatbot2.default.webhook);
+router.post('/webhook', chatbot_controller.webhook);
 
 /**
  * YouTube API Test Routes
  **/
 
-router.get('/youtube_search', _chatbot2.default.youtube_search);
+router.get('/youtube_search', chatbot_controller.youtube_search);
 
-module.exports = router;
+exports.default = router;
 
 /***/ }),
 /* 14 */
@@ -479,19 +500,24 @@ module.exports = router;
 "use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+exports.youtube_search = exports.webhook = undefined;
+
 var _request = __webpack_require__(15);
 
 var _request2 = _interopRequireDefault(_request);
 
 var _youtube_api = __webpack_require__(16);
 
-var _youtube_api2 = _interopRequireDefault(_youtube_api);
+var youTubeApiService = _interopRequireWildcard(_youtube_api);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var youtubeApiService = new _youtube_api2.default();
-
-exports.webhook = function (req, res) {
+var webhook = exports.webhook = function webhook(req, res) {
 
 	// Make sure this is a page subscription
 	if (req.body.object == "page") {
@@ -608,8 +634,8 @@ function sendMessage(recipientId, message) {
  * YouTube API Test functions
  **/
 
-exports.youtube_search = function (req, res) {
-	youtubeApiService.searchList(req.query['query_string']).then(function (searchListRepoonse, err) {
+var youtube_search = exports.youtube_search = function youtube_search(req, res) {
+	youTubeApiService.searchList(req.query['query_string']).then(function (searchListRepoonse, err) {
 		if (err) {
 			handleError(res, err.message, "searchList Error");
 		} else {
@@ -634,8 +660,7 @@ module.exports = require("request");
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+exports.searchList = undefined;
 
 var _googleapis = __webpack_require__(17);
 
@@ -643,80 +668,30 @@ var _googleapis2 = _interopRequireDefault(_googleapis);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var instance = null;
-
 var urlshortener = _googleapis2.default.urlshortener('v1');
 var youtube = _googleapis2.default.youtube('v3');
 
 var constQuery = 'Paul Simon';
 
-var YouTubeApiService = function () {
-	function YouTubeApiService() {
-		_classCallCheck(this, YouTubeApiService);
+var searchList = exports.searchList = function searchList(queryString) {
+	var searchListPromise = new Promise(function (resolve, reject) {
 
-		if (!instance) {
-			instance = this;
-			/*
-   let params = {
-   	auth: process.env.API_KEY,
-   	shortUrl: 'http://goo.gl/xKbRu3'
-   };
-   		// get the long url of a shortened url
-   urlshortener.url.get(params, (err, response) => {
-     if (err) {
-   	console.log('Encountered error', err);
-     } else {
-   	console.log('Long url is', response.longUrl);
-     }
-   });
-   
-   youtube.search.list({
-   	auth: process.env.API_KEY,
-   	maxResults: '1',
-                part: 'snippet',
-                q: 'front 242'
-   }, (err, response) => {
-     if (err) {
-   	console.log('Encountered error', err);
-     } else {
-   	console.log('Response', response.items[0].id, response.items[0].snippet);
-     }
-   });
-   */
-		}
+		youtube.search.list({
+			auth: process.env.API_KEY,
+			maxResults: '1',
+			part: 'snippet',
+			q: constQuery + ' ' + queryString
+		}, function (err, response) {
+			if (err) {
+				reject('searchList error');
+			} else {
+				resolve(response);
+			}
+		});
+	});
 
-		return instance;
-	}
-
-	_createClass(YouTubeApiService, [{
-		key: 'searchList',
-		value: function searchList(queryString) {
-			var searchListPromise = new Promise(function (resolve, reject) {
-
-				youtube.search.list({
-					auth: process.env.API_KEY,
-					maxResults: '1',
-					part: 'snippet',
-					q: constQuery + ' ' + queryString
-				}, function (err, response) {
-					if (err) {
-						reject('searchList error');
-					} else {
-						resolve(response);
-					}
-				});
-			});
-
-			return searchListPromise;
-		}
-	}]);
-
-	return YouTubeApiService;
-}();
-
-exports.default = YouTubeApiService;
+	return searchListPromise;
+};
 
 /***/ }),
 /* 17 */

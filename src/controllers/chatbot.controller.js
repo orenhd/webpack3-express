@@ -1,10 +1,8 @@
 import request from 'request';
 
-import YouTubeApiService from '../services/youtube_api.service';
+import * as youTubeApiService from '../services/youtube_api.service';
 
-let youtubeApiService = new YouTubeApiService();
-
-exports.webhook = (req, res) => {
+export const webhook = (req, res) => {
 
   // Make sure this is a page subscription
   if (req.body.object == "page") {
@@ -123,12 +121,12 @@ function sendMessage(recipientId, message) {
  * YouTube API Test functions
  **/
 
-exports.youtube_search = (req, res) => {
-	youtubeApiService.searchList(req.query['query_string']).then((searchListRepoonse, err) => {
+export const youtube_search = (req, res) => {
+	youTubeApiService.searchList(req.query['query_string']).then((searchListRepoonse, err) => {
 		if (err) {
 		  handleError(res, err.message, "searchList Error");
 		} else {
 		  res.status(200).json(searchListRepoonse);
 		}
 	})
-  }
+}
