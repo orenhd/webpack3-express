@@ -69,7 +69,7 @@ function processMyPostback(event) {
 }
 
 function fetchVideoAndSend(formattedMessage, recipientId, recipientName) {
-	youtubeApiService.searchList(formattedMessage).then((response, err) => {
+	youTubeApiService.searchList(formattedMessage).then((response, err) => {
 		if (err) {
 			//TODO: handle error
 		} else if (response && response.items[0]) {
