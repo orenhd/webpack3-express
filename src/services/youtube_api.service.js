@@ -1,4 +1,5 @@
 import google from 'googleapis';
+import config from '../config';
 
 const urlshortener = google.urlshortener('v1');
 const youtube = google.youtube('v3');
@@ -9,7 +10,7 @@ export const searchList = (queryString) => {
 	let searchListPromise = new Promise((resolve, reject) => {
 	
 		youtube.search.list({
-			auth: process.env.API_KEY,
+			auth: config.youtubeService.apiKey,
 			maxResults: '1',
 							part: 'snippet',
 							q: `${constQuery} ${queryString}`

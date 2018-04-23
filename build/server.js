@@ -66,54 +66,53 @@ require("source-map-support").install();
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
-
-module.exports = require("express");
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports) {
-
-module.exports = require("mongoose");
-
-/***/ }),
-/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
-exports.db = exports.MEADOWS_COLLECTION = undefined;
 
-var _dotenv = __webpack_require__(12);
+var _dotenv = __webpack_require__(6);
 
 var _dotenv2 = _interopRequireDefault(_dotenv);
 
-var _mongoose = __webpack_require__(1);
-
-var _mongoose2 = _interopRequireDefault(_mongoose);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var config = _dotenv2.default.config();
+_dotenv2.default.config();
 
-// Create a database variable outside of the database connection callback to reuse the connection pool in your app.
+var config = {
+    app: {
+        port: process.env.PORT || 8080
+    },
+    mongodb: {
+        uri: process.env.MONGODB_URI,
+        usersCollection: 'meadows'
+    },
+    chatbot: {
+        verifyToken: process.env.VERIFY_TOKEN,
+        pageAccessToken: process.env.PAGE_ACCESS_TOKEN
+    },
+    youtubeService: {
+        apiKey: process.env.API_KEY
+    }
+};
 
-var MEADOWS_COLLECTION = exports.MEADOWS_COLLECTION = "meadows";
+exports.default = config;
 
-_mongoose2.default.connection.on("open", function (ref) {
-  console.log("Connected to mongo server.");
-});
+/***/ }),
+/* 1 */
+/***/ (function(module, exports) {
 
-_mongoose2.default.connection.on("error", function (err) {
-  console.log("Could not connect to mongo server!");
-});
+module.exports = require("express");
 
-_mongoose2.default.connect(process.env.MONGODB_URI || 'mongodb://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@ds149122.mlab.com:49122/cryptic-meadow-db');
-var db = exports.db = _mongoose2.default.connection;
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+module.exports = require("mongoose");
 
 /***/ }),
 /* 3 */
@@ -122,7 +121,11 @@ var db = exports.db = _mongoose2.default.connection;
 "use strict";
 
 
-var _express = __webpack_require__(0);
+var _mongoose = __webpack_require__(2);
+
+var _mongoose2 = _interopRequireDefault(_mongoose);
+
+var _express = __webpack_require__(1);
 
 var _express2 = _interopRequireDefault(_express);
 
@@ -134,19 +137,41 @@ var _bodyParser = __webpack_require__(5);
 
 var _bodyParser2 = _interopRequireDefault(_bodyParser);
 
-var _router = __webpack_require__(6);
+var _config = __webpack_require__(0);
+
+var _config2 = _interopRequireDefault(_config);
+
+var _router = __webpack_require__(7);
 
 var _router2 = _interopRequireDefault(_router);
 
+var _socketBindings = __webpack_require__(18);
+
+var socketBindings = _interopRequireWildcard(_socketBindings);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+;
+
+
+//init mongodb connection
+_mongoose2.default.connection.on("open", function (ref) {
+  console.log("Connected to mongo server.");
+});
+
+_mongoose2.default.connection.on("error", function (err) {
+  console.log("Could not connect to mongo server!", err);
+});
+
+_mongoose2.default.connect(_config2.default.mongodb.uri, { useMongoClient: true });
 
 var app = (0, _express2.default)();
 
 // configure app to use bodyParser()
 app.use(_bodyParser2.default.urlencoded({ extended: true }));
 app.use(_bodyParser2.default.json());
-
-var port = process.env.PORT || 8080; // set our port
 
 //define public directory
 app.use("/", _express2.default.static(__dirname + '/public'));
@@ -159,15 +184,13 @@ app.get('/paint-socket', function (req, res) {
 // all of our routes will be prefixed with /api
 app.use('/api', _router2.default);
 
-var io = _socket2.default.listen(app.listen(port)); //start server + socket
+//start server + socket
+var io = _socket2.default.listen(app.listen(_config2.default.app.port));
 
-console.log('Magic happens on port ' + port);
+// init. socket bindings
+socketBindings.bind(io);
 
-io.on('connection', function (socket) {
-  socket.on('submit', function (doodleData) {
-    io.emit('publish', doodleData);
-  });
-});
+console.log('Magic happens on port ' + _config2.default.app.port);
 
 /***/ }),
 /* 4 */
@@ -183,6 +206,12 @@ module.exports = require("body-parser");
 
 /***/ }),
 /* 6 */
+/***/ (function(module, exports) {
+
+module.exports = require("dotenv");
+
+/***/ }),
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -192,11 +221,11 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _express = __webpack_require__(0);
+var _express = __webpack_require__(1);
 
 var _express2 = _interopRequireDefault(_express);
 
-var _user = __webpack_require__(7);
+var _user = __webpack_require__(8);
 
 var _user2 = _interopRequireDefault(_user);
 
@@ -221,7 +250,7 @@ router.use('/chatbot', _chatbot2.default);
 exports.default = router;
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -231,11 +260,11 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _express = __webpack_require__(0);
+var _express = __webpack_require__(1);
 
 var _express2 = _interopRequireDefault(_express);
 
-var _user = __webpack_require__(8);
+var _user = __webpack_require__(9);
 
 var user_controller = _interopRequireWildcard(_user);
 
@@ -259,7 +288,7 @@ router.get('/:id', user_controller.user_get);
 exports.default = router;
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -270,13 +299,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.user_get = exports.user_verify_token = exports.user_login = exports.user_signup = undefined;
 
-var _jsonwebtoken = __webpack_require__(9);
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _jsonwebtoken = __webpack_require__(10);
 
 var _jsonwebtoken2 = _interopRequireDefault(_jsonwebtoken);
 
-var _user = __webpack_require__(10);
-
-var _mongo_db = __webpack_require__(2);
+var _user = __webpack_require__(11);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -290,21 +319,23 @@ var user_signup = exports.user_signup = function user_signup(req, res) {
 
 	user_temp.save(function (err) {
 		if (err) {
-			throw err;
+			res.status(500).json(_extends({ error: "User signup error" }, err));
+		} else {
+			res.sendStatus(200);
 		}
-		res.status(200).json({});
 	});
 };
 
 var user_login = exports.user_login = function user_login(req, res) {
 	_user.UserModel.findOne({ username: req.body.username }, function (err, user) {
-		if (err) throw err;
-
-		if (user) {
+		if (err) {
+			res.status(500).json(_extends({ error: "User login error" }, err));
+		} else if (user) {
 			// test a matching password
 			user.comparePassword(req.body.password, function (err, isMatch) {
-				if (err) throw err;
-				if (isMatch) {
+				if (err) {
+					res.status(401).json(_extends({ error: "User authentication error" }, err));
+				} else if (isMatch) {
 					// if user is found and password is right - create a token
 					var token = _jsonwebtoken2.default.sign(user, AT_STRING, {
 						expiresIn: 180
@@ -317,11 +348,11 @@ var user_login = exports.user_login = function user_login(req, res) {
 						token: token
 					});
 				} else {
-					res.json({ success: false, message: 'Authentication failed. Wrong password.' });
+					res.status(404).json({ success: false, message: 'Authentication failed. Wrong password.' });
 				}
 			});
 		} else {
-			res.json({ success: false, message: 'Authentication failed. User not found.' });
+			res.status(404).json({ success: false, message: 'Authentication failed. User not found.' });
 		}
 	});
 };
@@ -354,9 +385,9 @@ var user_verify_token = exports.user_verify_token = function user_verify_token(r
 };
 
 var user_get = exports.user_get = function user_get(req, res) {
-	_mongo_db.db.collection(_mongo_db.MEADOWS_COLLECTION).findOne({ 'username': req.params.id }, function (err, doc) {
+	_user.UserModel.findOne({ 'username': req.params.id }, function (err, doc) {
 		if (err) {
-			handleError(res, err.message, "Failed to get meadow");
+			res.status(500).json(_extends({ error: "Failed to get user" }, err));
 		} else {
 			res.status(200).json({ username: doc.username });
 		}
@@ -364,13 +395,13 @@ var user_get = exports.user_get = function user_get(req, res) {
 };
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports) {
 
 module.exports = require("jsonwebtoken");
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -381,15 +412,17 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.UserModel = undefined;
 
-var _mongoose = __webpack_require__(1);
+var _mongoose = __webpack_require__(2);
 
 var _mongoose2 = _interopRequireDefault(_mongoose);
 
-var _bcrypt = __webpack_require__(11);
+var _bcrypt = __webpack_require__(12);
 
 var _bcrypt2 = _interopRequireDefault(_bcrypt);
 
-var _mongo_db = __webpack_require__(2);
+var _config = __webpack_require__(0);
+
+var _config2 = _interopRequireDefault(_config);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -430,19 +463,13 @@ userSchema.methods.comparePassword = function (candidatePassword, cb) {
     });
 };
 
-var UserModel = exports.UserModel = _mongoose2.default.model('User', userSchema, _mongo_db.MEADOWS_COLLECTION);
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports) {
-
-module.exports = require("bcrypt");
+var UserModel = exports.UserModel = _mongoose2.default.model('User', userSchema, _config2.default.mongodb.usersCollection);
 
 /***/ }),
 /* 12 */
 /***/ (function(module, exports) {
 
-module.exports = require("dotenv");
+module.exports = require("bcrypt");
 
 /***/ }),
 /* 13 */
@@ -455,9 +482,13 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _express = __webpack_require__(0);
+var _express = __webpack_require__(1);
 
 var _express2 = _interopRequireDefault(_express);
+
+var _config = __webpack_require__(0);
+
+var _config2 = _interopRequireDefault(_config);
 
 var _chatbot = __webpack_require__(14);
 
@@ -476,7 +507,7 @@ router.get('/', function (req, res) {
 });
 
 router.get('/webhook', function (req, res) {
-  if (req.query['hub.verify_token'] === process.env.VERIFY_TOKEN) {
+  if (req.query['hub.verify_token'] === _config2.default.chatbot.VERIFY_TOKEN) {
     res.send(req.query['hub.challenge']);
   } else {
     res.send('Error, wrong validation token');
@@ -505,9 +536,15 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.youtube_search = exports.webhook = undefined;
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _request = __webpack_require__(15);
 
 var _request2 = _interopRequireDefault(_request);
+
+var _config = __webpack_require__(0);
+
+var _config2 = _interopRequireDefault(_config);
 
 var _youtube_api = __webpack_require__(16);
 
@@ -529,9 +566,7 @@ var webhook = exports.webhook = function webhook(req, res) {
 				if (event.message) {
 					processMessage(event);
 				} else if (event.postback) {
-					if (event.sender.id === process.env.MY_MICHAL_ID || event.sender.id === process.env.MY_ID) {
-						processMyPostback(event);
-					}
+					//TODO: process postbacks
 				}
 			});
 		});
@@ -551,27 +586,6 @@ function processMessage(event) {
 	// You may get a text or attachment but not both
 	if (message.text) {
 		var formattedMsg = message.text.toLowerCase().trim();
-		// Get user's first name from the User Profile API
-		// and include it in the greeting
-		/*
-  request({
-    url: "https://graph.facebook.com/v2.10/" + senderId,
-    qs: {
-  	access_token: process.env.PAGE_ACCESS_TOKEN,
-  	fields: "first_name"
-    },
-    method: "GET"
-  }, (error, response, body) => {
-    if (error) {
-  	console.log("Error getting user's name: " +  error);
-    } else {
-  	let bodyObj = JSON.parse(body);
-  	let senderName = bodyObj.first_name;
-  	fetchVideoAndSend(formattedMsg, senderId, senderName);
-    }
-    
-  });
-  */
 		fetchVideoAndSend(formattedMsg, senderId, 'senderName');
 	} else if (message.attachments) {
 		sendMessage(senderId, { text: "Sorry, I don't understand your request." });
@@ -584,9 +598,9 @@ function processMyPostback(event) {
 }
 
 function fetchVideoAndSend(formattedMessage, recipientId, recipientName) {
-	youtubeApiService.searchList(formattedMessage).then(function (response, err) {
+	youTubeApiService.searchList(formattedMessage).then(function (response, err) {
 		if (err) {
-			//TODO: handle error
+			console.log("Error searching video", err); //TODO: handle error
 		} else if (response && response.items[0]) {
 			var videoData = response.items[0];
 			var message = {
@@ -615,7 +629,7 @@ function fetchVideoAndSend(formattedMessage, recipientId, recipientName) {
 function sendMessage(recipientId, message) {
 	(0, _request2.default)({
 		url: "https://graph.facebook.com/v2.10/me/messages",
-		qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
+		qs: { access_token: _config2.default.chatbot.pageAccessToken },
 		method: "POST",
 		json: {
 			recipient: { id: recipientId },
@@ -623,9 +637,9 @@ function sendMessage(recipientId, message) {
 		}
 	}, function (error, response, body) {
 		if (error) {
-			console.log("Error sending message: " + response.error);
+			console.log("Error sending message", error);
 		} else {
-			//console.log(response);
+			console.log(response);
 		}
 	});
 }
@@ -637,7 +651,7 @@ function sendMessage(recipientId, message) {
 var youtube_search = exports.youtube_search = function youtube_search(req, res) {
 	youTubeApiService.searchList(req.query['query_string']).then(function (searchListRepoonse, err) {
 		if (err) {
-			handleError(res, err.message, "searchList Error");
+			res.status(500).json(_extends({}, err, { error: "searchList Error" }));
 		} else {
 			res.status(200).json(searchListRepoonse);
 		}
@@ -666,6 +680,10 @@ var _googleapis = __webpack_require__(17);
 
 var _googleapis2 = _interopRequireDefault(_googleapis);
 
+var _config = __webpack_require__(0);
+
+var _config2 = _interopRequireDefault(_config);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var urlshortener = _googleapis2.default.urlshortener('v1');
@@ -677,7 +695,7 @@ var searchList = exports.searchList = function searchList(queryString) {
 	var searchListPromise = new Promise(function (resolve, reject) {
 
 		youtube.search.list({
-			auth: process.env.API_KEY,
+			auth: _config2.default.youtubeService.apiKey,
 			maxResults: '1',
 			part: 'snippet',
 			q: constQuery + ' ' + queryString
@@ -698,6 +716,48 @@ var searchList = exports.searchList = function searchList(queryString) {
 /***/ (function(module, exports) {
 
 module.exports = require("googleapis");
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.bind = bind;
+
+var _paintSocket = __webpack_require__(19);
+
+var paintSocketBindings = _interopRequireWildcard(_paintSocket);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function bind(io) {
+
+    paintSocketBindings.bind(io.of('/paint-socket'));
+}
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.bind = bind;
+function bind(io) {
+    io.on('connection', function (socket) {
+        socket.on('submit', function (doodleData) {
+            io.emit('publish', doodleData);
+        });
+    });
+}
 
 /***/ })
 /******/ ]);

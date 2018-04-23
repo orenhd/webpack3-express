@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
-import {MEADOWS_COLLECTION} from '../databases/mongo_db';
+import config from '../config';
 
 const SALT_WORK_FACTOR = 10;
 
@@ -37,5 +37,5 @@ userSchema.methods.comparePassword = function(candidatePassword, cb) { // compar
     });
 };
 
-export const UserModel = mongoose.model('User', userSchema, MEADOWS_COLLECTION);
+export const UserModel = mongoose.model('User', userSchema, config.mongodb.usersCollection);
 

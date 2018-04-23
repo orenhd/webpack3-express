@@ -237,7 +237,7 @@ function BindEventHandlers() {
 }
 
 window.onload = function() {
-  socket = io.connect();
+  socket = io('/paint-socket');
   socket.on('connect', function(data) {
 		Init();
 	  BindEventHandlers();

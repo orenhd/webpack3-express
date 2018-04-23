@@ -1,4 +1,5 @@
 import express from 'express';
+import config from '../config';
 
 import * as chatbot_controller from '../controllers/chatbot.controller';
 
@@ -11,7 +12,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/webhook', (req, res) => {
-	if (req.query['hub.verify_token'] === process.env.VERIFY_TOKEN) {
+	if (req.query['hub.verify_token'] === config.chatbot.VERIFY_TOKEN) {
       res.send(req.query['hub.challenge']);
     } else {
       res.send('Error, wrong validation token');    
