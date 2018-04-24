@@ -11,15 +11,15 @@ import router from './routes/router';
 import * as socketBindings from './socket-bindings';
 
 //init mongodb connection
-mongoose.connection.on("open", function(ref) {
+mongoose.connection.on("open", function (ref) {
   console.log("Connected to mongo server.");
 });
 
-mongoose.connection.on("error", function(err) {
+mongoose.connection.on("error", function (err) {
   console.log("Could not connect to mongo server!", err);
 });
 
-mongoose.connect(config.mongodb.uri, { useMongoClient: true });
+mongoose.connect(config.databases.mongodb.uri, { useMongoClient: true });
 
 const app = express();
 
@@ -38,12 +38,23 @@ app.get('/paint-socket', function (req, res) {
 // all of our routes will be prefixed with /api
 app.use('/api', router);
 
+// configure error handler
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ success: false, message: err });
+})
+
+// configure 404 handler
+app.use((req, res, next) => {
+  res.status(404).send('Sorry, not found.')
+})
+
 //start server + socket
 const io = socketIO.listen(app.listen(config.app.port));
 
 // init. socket bindings
 socketBindings.bind(io);
 
-console.log(`Magic happens on port ${config.app.port}`)
+console.log(`Magic happens on port ${config.app.port}, on environment '${config.env}'.`)
 
 

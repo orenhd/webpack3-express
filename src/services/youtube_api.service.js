@@ -10,7 +10,7 @@ export const searchList = (queryString) => {
 	let searchListPromise = new Promise((resolve, reject) => {
 	
 		youtube.search.list({
-			auth: config.youtubeService.apiKey,
+			auth: config.services.youtube_api.apiKey,
 			maxResults: '1',
 							part: 'snippet',
 							q: `${constQuery} ${queryString}`

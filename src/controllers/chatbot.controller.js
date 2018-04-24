@@ -49,7 +49,7 @@ function processMyPostback(event) {
 function fetchVideoAndSend(formattedMessage, recipientId, recipientName) {
 	youTubeApiService.searchList(formattedMessage).then((response, err) => {
 		if (err) {
-			console.log("Error searching video", err); //TODO: handle error
+			console.error("Error searching video", err); //TODO: handle error
 		} else if (response && response.items[0]) {
 			let videoData = response.items[0];
 			let message = {
@@ -88,7 +88,7 @@ function sendMessage(recipientId, message) {
 		}
 	}, function (error, response, body) {
 		if (error) {
-			console.log("Error sending message", error);
+			console.error("Error sending message", error);
 		} else {
 			console.log(response);
 		}
@@ -99,12 +99,12 @@ function sendMessage(recipientId, message) {
  * YouTube API Test functions
  **/
 
-export const youtube_search = (req, res) => {
+export const youtube_search = (req, res, next) => {
 	youTubeApiService.searchList(req.query['query_string']).then((searchListRepoonse, err) => {
 		if (err) {
-			res.status(500).json({ ...err, error: "searchList Error" });
+			next(err);
 		} else {
-			res.status(200).json(searchListRepoonse);
+			res.status(200).json({ success: true, data: searchListRepoonse });
 		}
 	})
 }

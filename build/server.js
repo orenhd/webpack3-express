@@ -84,19 +84,24 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 _dotenv2.default.config();
 
 var config = {
+    env: process.env.NODE_ENV,
     app: {
         port: process.env.PORT || 8080
     },
-    mongodb: {
-        uri: process.env.MONGODB_URI,
-        usersCollection: 'meadows'
+    databases: {
+        mongodb: {
+            uri: process.env.MONGODB_URI,
+            usersCollection: 'meadows'
+        }
     },
     chatbot: {
         verifyToken: process.env.VERIFY_TOKEN,
         pageAccessToken: process.env.PAGE_ACCESS_TOKEN
     },
-    youtubeService: {
-        apiKey: process.env.API_KEY
+    services: {
+        youtube_api: {
+            apiKey: process.env.API_KEY
+        }
     }
 };
 
@@ -165,7 +170,7 @@ _mongoose2.default.connection.on("error", function (err) {
   console.log("Could not connect to mongo server!", err);
 });
 
-_mongoose2.default.connect(_config2.default.mongodb.uri, { useMongoClient: true });
+_mongoose2.default.connect(_config2.default.databases.mongodb.uri, { useMongoClient: true });
 
 var app = (0, _express2.default)();
 
@@ -184,13 +189,24 @@ app.get('/paint-socket', function (req, res) {
 // all of our routes will be prefixed with /api
 app.use('/api', _router2.default);
 
+// configure error handler
+app.use(function (err, req, res, next) {
+  console.error(err);
+  res.status(500).json({ success: false, message: err });
+});
+
+// configure 404 handler
+app.use(function (req, res, next) {
+  res.status(404).send('Sorry, not found.');
+});
+
 //start server + socket
 var io = _socket2.default.listen(app.listen(_config2.default.app.port));
 
 // init. socket bindings
 socketBindings.bind(io);
 
-console.log('Magic happens on port ' + _config2.default.app.port);
+console.log('Magic happens on port ' + _config2.default.app.port + ', on environment \'' + _config2.default.env + '\'.');
 
 /***/ }),
 /* 4 */
@@ -240,7 +256,7 @@ var router = _express2.default.Router();
 
 // test route to make sure everything is working
 router.get('/', function (req, res) {
-    res.json({ message: 'hooray! welcome to our api!' });
+    res.status(200).json({ success: true, message: 'hooray! welcome to our api!' });
 });
 
 // use sub routes
@@ -299,8 +315,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.user_get = exports.user_verify_token = exports.user_login = exports.user_signup = undefined;
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _jsonwebtoken = __webpack_require__(10);
 
 var _jsonwebtoken2 = _interopRequireDefault(_jsonwebtoken);
@@ -311,7 +325,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var AT_STRING = 'thisisthestring';
 
-var user_signup = exports.user_signup = function user_signup(req, res) {
+var user_signup = exports.user_signup = function user_signup(req, res, next) {
 	var user_temp = new _user.UserModel({
 		username: req.body.username,
 		password: req.body.password
@@ -319,22 +333,22 @@ var user_signup = exports.user_signup = function user_signup(req, res) {
 
 	user_temp.save(function (err) {
 		if (err) {
-			res.status(500).json(_extends({ error: "User signup error" }, err));
+			next(err);
 		} else {
-			res.sendStatus(200);
+			res.status(200).json({ success: true });
 		}
 	});
 };
 
-var user_login = exports.user_login = function user_login(req, res) {
+var user_login = exports.user_login = function user_login(req, res, next) {
 	_user.UserModel.findOne({ username: req.body.username }, function (err, user) {
 		if (err) {
-			res.status(500).json(_extends({ error: "User login error" }, err));
+			next(err);
 		} else if (user) {
 			// test a matching password
 			user.comparePassword(req.body.password, function (err, isMatch) {
 				if (err) {
-					res.status(401).json(_extends({ error: "User authentication error" }, err));
+					next(err);
 				} else if (isMatch) {
 					// if user is found and password is right - create a token
 					var token = _jsonwebtoken2.default.sign(user, AT_STRING, {
@@ -342,17 +356,13 @@ var user_login = exports.user_login = function user_login(req, res) {
 					});
 
 					// return the information including token as JSON
-					res.status(200).json({
-						success: true,
-						message: 'Enjoy your token!',
-						token: token
-					});
+					res.status(200).json({ success: true, data: { token: token }, message: 'Enjoy your token!' });
 				} else {
-					res.status(404).json({ success: false, message: 'Authentication failed. Wrong password.' });
+					res.status(401).json({ success: false, message: 'Authentication failed. Wrong password.' });
 				}
 			});
 		} else {
-			res.status(404).json({ success: false, message: 'Authentication failed. User not found.' });
+			res.status(401).json({ success: false, message: 'Authentication failed. User not found.' });
 		}
 	});
 };
@@ -368,7 +378,7 @@ var user_verify_token = exports.user_verify_token = function user_verify_token(r
 		// verifies secret and checks exp
 		_jsonwebtoken2.default.verify(token, AT_STRING, function (err, decoded) {
 			if (err) {
-				return res.json({ success: false, message: 'Failed to authenticate token.' });
+				next(err);
 			} else {
 				// if everything is good, save to request for use in other routes
 				req.decoded = decoded;
@@ -377,19 +387,18 @@ var user_verify_token = exports.user_verify_token = function user_verify_token(r
 		});
 	} else {
 		// if there is no token - return an error
-		return res.status(403).send({
-			success: false,
-			message: 'No token provided.'
-		});
+		return res.status(401).send({ success: false, message: 'No token provided.' });
 	}
 };
 
-var user_get = exports.user_get = function user_get(req, res) {
+var user_get = exports.user_get = function user_get(req, res, next) {
 	_user.UserModel.findOne({ 'username': req.params.id }, function (err, doc) {
 		if (err) {
-			res.status(500).json(_extends({ error: "Failed to get user" }, err));
+			next(err);
+		} else if (doc) {
+			res.status(200).json({ success: true, data: { username: doc.username } });
 		} else {
-			res.status(200).json({ username: doc.username });
+			next();
 		}
 	});
 };
@@ -463,7 +472,7 @@ userSchema.methods.comparePassword = function (candidatePassword, cb) {
     });
 };
 
-var UserModel = exports.UserModel = _mongoose2.default.model('User', userSchema, _config2.default.mongodb.usersCollection);
+var UserModel = exports.UserModel = _mongoose2.default.model('User', userSchema, _config2.default.databases.mongodb.usersCollection);
 
 /***/ }),
 /* 12 */
@@ -503,7 +512,7 @@ var router = _express2.default.Router();
 // define routes
 
 router.get('/', function (req, res) {
-  res.json({ message: 'hooray! welcome to our chatbot!' });
+  res.status(200).json({ success: true, message: 'hooray! welcome to our chatbot!' });
 });
 
 router.get('/webhook', function (req, res) {
@@ -535,8 +544,6 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 exports.youtube_search = exports.webhook = undefined;
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _request = __webpack_require__(15);
 
@@ -600,7 +607,7 @@ function processMyPostback(event) {
 function fetchVideoAndSend(formattedMessage, recipientId, recipientName) {
 	youTubeApiService.searchList(formattedMessage).then(function (response, err) {
 		if (err) {
-			console.log("Error searching video", err); //TODO: handle error
+			console.error("Error searching video", err); //TODO: handle error
 		} else if (response && response.items[0]) {
 			var videoData = response.items[0];
 			var message = {
@@ -637,7 +644,7 @@ function sendMessage(recipientId, message) {
 		}
 	}, function (error, response, body) {
 		if (error) {
-			console.log("Error sending message", error);
+			console.error("Error sending message", error);
 		} else {
 			console.log(response);
 		}
@@ -648,12 +655,12 @@ function sendMessage(recipientId, message) {
  * YouTube API Test functions
  **/
 
-var youtube_search = exports.youtube_search = function youtube_search(req, res) {
+var youtube_search = exports.youtube_search = function youtube_search(req, res, next) {
 	youTubeApiService.searchList(req.query['query_string']).then(function (searchListRepoonse, err) {
 		if (err) {
-			res.status(500).json(_extends({}, err, { error: "searchList Error" }));
+			next(err);
 		} else {
-			res.status(200).json(searchListRepoonse);
+			res.status(200).json({ success: true, data: searchListRepoonse });
 		}
 	});
 };
@@ -695,7 +702,7 @@ var searchList = exports.searchList = function searchList(queryString) {
 	var searchListPromise = new Promise(function (resolve, reject) {
 
 		youtube.search.list({
-			auth: _config2.default.youtubeService.apiKey,
+			auth: _config2.default.services.youtube_api.apiKey,
 			maxResults: '1',
 			part: 'snippet',
 			q: constQuery + ' ' + queryString

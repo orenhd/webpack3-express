@@ -8,7 +8,7 @@ const router = express.Router();
 // define routes
 
 router.get('/', (req, res) => {
-    res.json({ message: 'hooray! welcome to our chatbot!' });   
+    res.status(200).json({ success: true, message: 'hooray! welcome to our chatbot!' });   
 });
 
 router.get('/webhook', (req, res) => {

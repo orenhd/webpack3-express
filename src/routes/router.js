@@ -8,7 +8,7 @@ const router = express.Router();
 
 // test route to make sure everything is working
 router.get('/', function(req, res) {
-    res.json({ message: 'hooray! welcome to our api!' });   
+    res.status(200).json({ success: true, message: 'hooray! welcome to our api!' });   
 });
 
 // use sub routes
