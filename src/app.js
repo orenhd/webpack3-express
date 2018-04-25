@@ -50,11 +50,14 @@ app.use((req, res, next) => {
 })
 
 //start server + socket
-const io = socketIO.listen(app.listen(config.app.port));
+const server = app.listen(config.app.port, () => {
+  console.log(`Magic happens on port ${config.app.port}, on environment '${config.env}'.`);
+});
+const io = socketIO.listen(server);
 
 // init. socket bindings
 socketBindings.bind(io);
 
-console.log(`Magic happens on port ${config.app.port}, on environment '${config.env}'.`)
+
 
 

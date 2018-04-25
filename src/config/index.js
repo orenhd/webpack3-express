@@ -6,6 +6,7 @@ const config = {
     env: process.env.NODE_ENV,
     app: {
         port: process.env.PORT || 8080,
+        at_string: process.env.AT_STRING,
     },
     databases: {
         mongodb: {

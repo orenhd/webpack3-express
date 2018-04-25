@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 
 import { UserModel } from '../models/user.model';
 
-const AT_STRING = 'thisisthestring';
+import config from '../config';
 
 export const user_signup = (req, res, next) => {
 	let user_temp = new UserModel({
@@ -30,12 +30,12 @@ export const user_login = (req, res, next) => {
 					next(err);
 				} else if (isMatch) {
 					// if user is found and password is right - create a token
-					let token = jwt.sign(user, AT_STRING, {
+					let token = jwt.sign(user, config.app.at_string, {
 						expiresIn: 180
 					});
 
 					// return the information including token as JSON
-					res.status(200).json({ success: true, data: { token }, message: 'Enjoy your token!' });
+					res.status(200).json({ success: true, data: { token }, message: 'Enjoy your token.' });
 				} else {
 					res.status(401).json({ success: false, message: 'Authentication failed. Wrong password.' });
 				}
@@ -55,7 +55,7 @@ export const user_verify_token = (req, res, next) => {
 	// decode token
 	if (token) {
 		// verifies secret and checks exp
-		jwt.verify(token, AT_STRING, (err, decoded) => {
+		jwt.verify(token, config.app.at_string, (err, decoded) => {
 			if (err) {
 				next(err);
 			} else {

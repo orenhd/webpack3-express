@@ -86,7 +86,8 @@ _dotenv2.default.config();
 var config = {
     env: process.env.NODE_ENV,
     app: {
-        port: process.env.PORT || 8080
+        port: process.env.PORT || 8080,
+        at_string: process.env.AT_STRING
     },
     databases: {
         mongodb: {
@@ -201,12 +202,13 @@ app.use(function (req, res, next) {
 });
 
 //start server + socket
-var io = _socket2.default.listen(app.listen(_config2.default.app.port));
+var server = app.listen(_config2.default.app.port, function () {
+  console.log('Magic happens on port ' + _config2.default.app.port + ', on environment \'' + _config2.default.env + '\'.');
+});
+var io = _socket2.default.listen(server);
 
 // init. socket bindings
 socketBindings.bind(io);
-
-console.log('Magic happens on port ' + _config2.default.app.port + ', on environment \'' + _config2.default.env + '\'.');
 
 /***/ }),
 /* 4 */
@@ -321,9 +323,11 @@ var _jsonwebtoken2 = _interopRequireDefault(_jsonwebtoken);
 
 var _user = __webpack_require__(11);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _config = __webpack_require__(0);
 
-var AT_STRING = 'thisisthestring';
+var _config2 = _interopRequireDefault(_config);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var user_signup = exports.user_signup = function user_signup(req, res, next) {
 	var user_temp = new _user.UserModel({
@@ -351,12 +355,12 @@ var user_login = exports.user_login = function user_login(req, res, next) {
 					next(err);
 				} else if (isMatch) {
 					// if user is found and password is right - create a token
-					var token = _jsonwebtoken2.default.sign(user, AT_STRING, {
+					var token = _jsonwebtoken2.default.sign(user, _config2.default.app.at_string, {
 						expiresIn: 180
 					});
 
 					// return the information including token as JSON
-					res.status(200).json({ success: true, data: { token: token }, message: 'Enjoy your token!' });
+					res.status(200).json({ success: true, data: { token: token }, message: 'Enjoy your token.' });
 				} else {
 					res.status(401).json({ success: false, message: 'Authentication failed. Wrong password.' });
 				}
@@ -376,7 +380,7 @@ var user_verify_token = exports.user_verify_token = function user_verify_token(r
 	// decode token
 	if (token) {
 		// verifies secret and checks exp
-		_jsonwebtoken2.default.verify(token, AT_STRING, function (err, decoded) {
+		_jsonwebtoken2.default.verify(token, _config2.default.app.at_string, function (err, decoded) {
 			if (err) {
 				next(err);
 			} else {
