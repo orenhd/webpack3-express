@@ -7,6 +7,7 @@ const config = {
     app: {
         port: process.env.PORT || 8080,
         at_string: process.env.AT_STRING,
+        jwt_life_span: 180,
     },
     databases: {
         mongodb: {

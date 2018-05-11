@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+mongoose.Promise = global.Promise;
+
 import express from 'express';
 import socketIO from 'socket.io';
 

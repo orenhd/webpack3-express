@@ -6,7 +6,8 @@ const SALT_WORK_FACTOR = 10;
 
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, index: { unique: true } },
-    password: { type: String, required: true }
+    password: { type: String, required: true, select: false }, // exclude password from select, unless explicitly requested
+    friends: { type: [String], default: [] },
 });
 
 userSchema.pre('save', function(next) { // generate salt and hash before sving password prop.
@@ -16,11 +17,11 @@ userSchema.pre('save', function(next) { // generate salt and hash before sving p
     if (!user.isModified('password')) return next();
 
     // generate a salt
-    bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
+    bcrypt.genSalt(SALT_WORK_FACTOR, (err, salt) => {
         if (err) return next(err);
 
         // hash the password along with our new salt
-        bcrypt.hash(user.password, salt, function(err, hash) {
+        bcrypt.hash(user.password, salt, (err, hash) => {
             if (err) return next(err);
 
             // override the cleartext password with the hashed one
@@ -30,10 +31,10 @@ userSchema.pre('save', function(next) { // generate salt and hash before sving p
     });
 });
 
-userSchema.methods.comparePassword = function(candidatePassword, cb) { // compare password method, to verify password matching
-    bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
-        if (err) return cb(err);
-        cb(null, isMatch);
+userSchema.methods.comparePassword = function(candidatePassword, callback) { // compare password method, to verify password matching
+    bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
+        if (err) return callback(err);
+        callback(null, isMatch);
     });
 };
 
