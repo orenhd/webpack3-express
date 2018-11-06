@@ -14,6 +14,5 @@ router.post('/login', user_controller.user_login);
 router.use(user_controller.user_verify_token);
 
 router.get('/:username', user_controller.user_get);
-	
+
 export default router;
-	

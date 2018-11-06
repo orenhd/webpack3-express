@@ -7,8 +7,8 @@ const youtube = google.youtube('v3');
 const constQuery = 'Paul Simon';
 
 export const searchList = (queryString) => {
-	let searchListPromise = new Promise((resolve, reject) => {
-	
+	const searchListPromise = new Promise((resolve, reject) => {
+
 		youtube.search.list({
 			auth: config.services.youtube_api.apiKey,
 			maxResults: '1',
@@ -22,6 +22,6 @@ export const searchList = (queryString) => {
 			}
 		});
 	});
-	
+
 	return searchListPromise;
 }

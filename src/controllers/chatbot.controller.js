@@ -29,21 +29,16 @@ export const webhook = (req, res) => {
  **/
 
 function processMessage(event) {
-	let message = event.message;
-	let senderId = event.sender.id;
+	const message = event.message;
+	const senderId = event.sender.id;
 
 	// You may get a text or attachment but not both
 	if (message.text) {
-		let formattedMsg = message.text.toLowerCase().trim();
+		const formattedMsg = message.text.toLowerCase().trim();
 		fetchVideoAndSend(formattedMsg, senderId, 'senderName');
 	} else if (message.attachments) {
 		sendMessage(senderId, { text: "Sorry, I don't understand your request." });
 	}
-}
-
-function processMyPostback(event) {
-	let senderId = event.sender.id;
-	let payload = event.postback.payload;
 }
 
 function fetchVideoAndSend(formattedMessage, recipientId, recipientName) {
@@ -51,8 +46,8 @@ function fetchVideoAndSend(formattedMessage, recipientId, recipientName) {
 		if (err) {
 			console.error("Error searching video", err); //TODO: handle error
 		} else if (response && response.items[0]) {
-			let videoData = response.items[0];
-			let message = {
+			const videoData = response.items[0];
+			const message = {
 				"attachment": {
 					"type": "template",
 					"payload": {
@@ -70,7 +65,7 @@ function fetchVideoAndSend(formattedMessage, recipientId, recipientName) {
 						]
 					}
 				}
-			}
+			};
 			sendMessage(recipientId, message)
 		}
 	})

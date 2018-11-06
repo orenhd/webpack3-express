@@ -3,12 +3,15 @@ mongoose.Promise = global.Promise;
 
 import express from 'express';
 import socketIO from 'socket.io';
+import graphqlHTTP from 'express-graphql';
 
 import bodyParser from 'body-parser';
 
 import config from './config';
-;
+
 import router from './routes/router';
+
+import graphqlSchema from './graphql/schema';
 
 import * as socketBindings from './socket-bindings';
 
@@ -37,6 +40,11 @@ app.get('/paint-socket', function (req, res) {
   res.sendFile(__dirname + '/public/paint-socket.html');
 });
 
+app.use('/graphql', graphqlHTTP({
+  schema: graphqlSchema,
+  graphiql: true,
+}));
+
 // all of our routes will be prefixed with /api
 app.use('/api', router);
 
@@ -44,12 +52,12 @@ app.use('/api', router);
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ success: false, message: err });
-})
+});
 
 // configure 404 handler
 app.use((req, res, next) => {
   res.status(404).send('Sorry, not found.')
-})
+});
 
 //start server + socket
 const server = app.listen(config.app.port, () => {

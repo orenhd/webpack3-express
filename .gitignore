@@ -1,6 +1,8 @@
 # Add any directories, files, or patterns you don't want to be tracked by version control
 /package-lock.json
 /node_modules
+/local
+/build/server*.*
 /npm-debug.log
 /.DS_Store
 /.env

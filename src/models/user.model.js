@@ -32,10 +32,14 @@ userSchema.pre('save', function(next) { // generate salt and hash before sving p
 });
 
 userSchema.methods.comparePassword = function(candidatePassword, callback) { // compare password method, to verify password matching
-    bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
+    if (callback) {
+      bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
         if (err) return callback(err);
         callback(null, isMatch);
-    });
+      });
+    } else {
+      return bcrypt.compare(candidatePassword, this.password); // returns a promise
+    }
 };
 
 export const UserModel = mongoose.model('User', userSchema, config.databases.mongodb.usersCollection);
