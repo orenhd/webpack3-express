@@ -2,7 +2,7 @@
   "name": "webpack3-express",
   "version": "1.0.0",
   "engines": {
-    "node": "6.10.3"
+    "node": "10.15.3"
   },
   "description": "",
   "scripts": {
